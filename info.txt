@@ -1,0 +1,53 @@
+Customer:
+	name
+    energyBalanceEur
+Space:
+	name
+	size
+
+EnergyInKw:
+    Amount
+    Space
+
+Rents:
+	customer
+	space
+	date
+
+
+
+Prices:
+	spacePersSizePrice
+	validDateRange
+
+Rebate:
+    customer
+    space
+	percent
+	validDateRange
+
+
+Context:
+customerId
+invoiceFrom
+invoiceTo
+kwPrice
+
+rents = #rents(customerid, from, to)
+prices= #prices(rents)
+rentsWithPrices = #calculateRents(prices,rents)
+rebates= #rebates(rents)
+energyUsedKw= #energyKw(rents)
+
+total1=sum(prices)
+rebate=sum(rebates)
+energyTotal=sum(energyUsed)
+energyPrice=multiply(energyTotal, kwPrice)
+total2=minus(total1, rebate)
+total3=minus(total2, energyBalancEur)
+
+
+
+
+
+Idee: Wir machen einen COntext (mit zBN customerid, from und to schon drinnen), obiges is die striptsprache, "#prices" ist eine methode im context (in einer map <string, function>), am besten auch einen filter machen "$somefilter(rents)"
