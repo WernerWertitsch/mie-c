@@ -10,25 +10,16 @@ import java.util.List;
 @Component
 public class ListMathFunctionsProvider  {
 
-    @Autowired
     GenericDoubleValueProvider genericDoubleValueProvider;
+
+    public ListMathFunctionsProvider( GenericDoubleValueProvider genericDoubleValueProvider) {
+        this.genericDoubleValueProvider = genericDoubleValueProvider;
+    }
 
     public Double getSum(List<Object> source, String valueIdentifier, Class clazz) {
         Double sum = Double.valueOf(0.0);
         source.stream().map(item -> getDoubleValue(source, valueIdentifier, clazz)).reduce( (l,r) -> l + r);
         return sum;
-    }
-
-    public Double getPercentage(Object source, String valueIdentifier, Class clazz, double percent) {
-        return getDoubleValue(source, valueIdentifier, clazz)*percent/100;
-    }
-
-    public Double multiply(Object source, String valueIdentifier, Class clazz, double multiplier) {
-        return getDoubleValue(source, valueIdentifier, clazz)*multiplier;
-    }
-
-    public Double substractAllFrom(Double startValue, List<Object> subsctractions, String valueIdentifier, Class clazz) {
-        return startValue - getSum(subsctractions.subList(1, subsctractions.size()), valueIdentifier, clazz);
     }
 
     private Double getDoubleValue(Object source, String valueIdentifier, Class clazz) {
@@ -39,4 +30,9 @@ public class ListMathFunctionsProvider  {
             return 0.0;
         }
     }
+
+    public Double substractAllFrom(List<Object> subsctractions, String valueIdentifier, Class clazz) {
+        return getDoubleValue(subsctractions.get(0), valueIdentifier, clazz) - getSum(subsctractions.subList(1, subsctractions.size()), valueIdentifier, clazz);
+    }
+
 }

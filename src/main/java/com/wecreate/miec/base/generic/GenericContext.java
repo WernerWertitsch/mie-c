@@ -9,10 +9,10 @@ import java.util.function.Function;
 public class GenericContext {
     Map<String, Function<GenericContext, Object>> functionMap = new HashMap<>();
     Map<String, List<String>> functionParamMap = new HashMap<>();
-    Map<String, Function<GenericContext, Boolean>> filterMap = new HashMap<>();
+    Map<String, Function<Object, Boolean>> filterMap = new HashMap<>();
     Map<String, Object> variables = new HashMap<>();
 
-    public  Function<GenericContext,? extends Object> get(String fullIdentifier) {
+    public  Function<? ,? extends Object> get(String fullIdentifier) {
         String pureKey = fullIdentifier;
         if(fullIdentifier.startsWith("#")) {
             pureKey = pureKey.substring(1);
@@ -66,10 +66,6 @@ public class GenericContext {
             }
             this.functionParamMap.put(pureKey, paramsAsList);
         }
-//        else {
-//            this.functionParamMap.put(pureKey, new ArrayList<>());
-//        }
-
         this.functionMap.put(pureKey, value);
     }
 
@@ -77,11 +73,11 @@ public class GenericContext {
         return this.functionMap.get(key);
     }
 
-    public void addFilter(String key, Function<GenericContext, Boolean> value) {
+    public void addFilter(String key, Function<Object, Boolean> value) {
         this.filterMap.put(key, value);
     }
 
-    protected Function<GenericContext, Boolean> getFilter(String key) {
+    protected Function<Object, Boolean> getFilter(String key) {
         return this.filterMap.get(key);
     }
 
