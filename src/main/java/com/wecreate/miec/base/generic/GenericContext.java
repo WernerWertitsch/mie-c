@@ -1,34 +1,30 @@
 package com.wecreate.miec.base.generic;
 
+import com.wecreate.miec.base.generic.util.MessageReceiver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class GenericContext {
     Map<String, Function<GenericContext, Object>> functionMap = new HashMap<>();
     Map<String, List<String>> functionParamMap = new HashMap<>();
     Map<String, Function<Object, Boolean>> filterMap = new HashMap<>();
-    Map<String, Object> variables = new HashMap<>();
+    Map<String, Supplier<Object>> variables = new HashMap<>();
 
-    public  Function<? ,? extends Object> get(String fullIdentifier) {
-        String pureKey = fullIdentifier;
-        if(fullIdentifier.startsWith("#")) {
-            pureKey = pureKey.substring(1);
-            return getFunction(pureKey);
-        }
-        if(fullIdentifier.startsWith("$")) {
-            pureKey = pureKey.substring(1);
-            return getFilter(pureKey);
-        }
-        final Object var = getVariableValue(fullIdentifier);
-        if(var!=null) return (ctx) -> var;
+    public static final Function<String, Boolean> isFunctionIdentifier = (s -> s.startsWith("#"));
+    public static final Function<String, Boolean> isFulterIdentifier = (s -> s.startsWith("$"));
+    public static final Function<String, Boolean> isConstant = (s -> s.startsWith("+"));
 
-        // in case people forgot the filter/function identifier we will assume a mistake and return the respective function/filter
-        Function<GenericContext, Object> fun = getFunction(fullIdentifier);
-        if(fun!=null) return fun;
-        return getFilter(fullIdentifier);
+    MessageReceiver messageReceiver;
+
+    public GenericContext(MessageReceiver messageReceiver) {
+        this.messageReceiver = messageReceiver;
     }
 
     public StringBuilder printAllDefinitions() {
@@ -69,8 +65,8 @@ public class GenericContext {
         this.functionMap.put(pureKey, value);
     }
 
-    protected Function<GenericContext, Object> getFunction(String key) {
-        return this.functionMap.get(key);
+    protected <T>Function<GenericContext, T> getFunction(String key) {
+        return (Function<GenericContext, T>) this.functionMap.get(key);
     }
 
     public void addFilter(String key, Function<Object, Boolean> value) {
@@ -82,11 +78,11 @@ public class GenericContext {
     }
 
     public void putVariableValue(String key, Object value) {
-        this.variables.put(key, value);
+        this.variables.put(key, ()->value);
     }
 
-    protected Object getVariableValue(String key) {
-        return this.variables.get(key);
+    protected <T>Supplier<T> getVariableValue(String key) {
+        return (Supplier<T>) this.variables.get(key);
     }
 
 

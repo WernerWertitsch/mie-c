@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public class ExampleContext extends GenericContext {
+public class ExampleContext {
     MainModelAndData.Customer curentCustomer;
     LocalDate fromDate = LocalDate.now().minus(30, ChronoUnit.DAYS);
     LocalDate toDate = LocalDate.now();
@@ -16,26 +16,26 @@ public class ExampleContext extends GenericContext {
 //    @Autowired
     MainModelAndData mainModelAndData = new MainModelAndData();
 
-    public ExampleContext() {
+    public void populateContext(GenericContext context) {
         this.curentCustomer = mainModelAndData.getCustomer(1).get();
-        putVariableValue("from", fromDate);
-        putVariableValue("to", toDate);
-        putVariableValue("customerId", curentCustomer.getId());
-        putVariableValue("energyPrice", energyPrice);
+        context.putVariableValue("from", fromDate);
+        context.putVariableValue("to", toDate);
+        context.putVariableValue("customerId", curentCustomer.getId());
+        context.putVariableValue("energyPrice", energyPrice);
 
-        addFunction("energyUsageInKw", context -> mainModelAndData.getEnergyUsageInKws());
-        addFunction("rents(customerId,from,to)", context -> mainModelAndData.findRentedDaysForCustomer(
-                (Integer) context.get("customerId").apply(this),
-                (LocalDate) context.get("from").apply(this),
-                (LocalDate) context.get("to").apply(this)));
-        addFunction("calculateRents(prices,rents)", context -> mainModelAndData.enrichRentDataWithPrice(
-                (List<MainModelAndData.ConfirmedRentedDay>) context.get("prices").apply(this),
-                (List<MainModelAndData.Price>) context.get("rents").apply(this)
+        context.addFunction("energyUsageInKw", c -> mainModelAndData.getEnergyUsageInKws());
+        context.addFunction("rents(customerId,from,to)", c -> mainModelAndData.findRentedDaysForCustomer(
+                (Integer) c.<Integer>get("customerId").apply(this),
+                (LocalDate) c.get("from").apply(this),
+                (LocalDate) c.get("to").apply(this)));
+        context.addFunction("calculateRents(prices,rents)", c -> mainModelAndData.enrichRentDataWithPrice(
+                (List<MainModelAndData.ConfirmedRentedDay>) c.get("prices").apply(this),
+                (List<MainModelAndData.Price>) c.get("rents").apply(this)
         ));
-        addFunction("energyKw(rents,energyInKw)", context -> mainModelAndData.allEnergyForRents(
-                (List<MainModelAndData.ConfirmedRentedDay>) context.get("rents").apply(this),
-                (List<MainModelAndData.EnergyInKw>) context.get("energyUsageInKw").apply(this),
-                (Double)context.get("energyPrice").apply(this)
+        context.addFunction("energyKw(rents,energyInKw)", c -> mainModelAndData.allEnergyForRents(
+                (List<MainModelAndData.ConfirmedRentedDay>) c.get("rents").apply(this),
+                (List<MainModelAndData.EnergyInKw>) c.get("energyUsageInKw").apply(this),
+                (Double)c.get("energyPrice").apply(this)
         ));
     }
 
