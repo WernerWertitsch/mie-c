@@ -65,7 +65,7 @@ public class GenericContext {
         this.functionMap.put(pureKey, value);
     }
 
-    protected <T>Function<GenericContext, T> getFunction(String key) {
+    public <T>Function<GenericContext, T> getFunction(String key) {
         return (Function<GenericContext, T>) this.functionMap.get(key);
     }
 
@@ -73,7 +73,7 @@ public class GenericContext {
         this.filterMap.put(key, value);
     }
 
-    protected Function<Object, Boolean> getFilter(String key) {
+    public Function<Object, Boolean> getFilter(String key) {
         return this.filterMap.get(key);
     }
 
@@ -81,7 +81,7 @@ public class GenericContext {
         this.variables.put(key, ()->value);
     }
 
-    protected <T>Supplier<T> getVariableValue(String key) {
+    public <T>Supplier<T> getVariableValue(String key) {
         return (Supplier<T>) this.variables.get(key);
     }
 

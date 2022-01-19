@@ -1,12 +1,13 @@
 package com.wecreate.miec.example;
 
 import com.wecreate.miec.base.generic.GenericContext;
+import com.wecreate.miec.base.generic.util.ContextPopulator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public class ExampleContext {
+public class DefaultDomainFunctions implements ContextPopulator {
     MainModelAndData.Customer curentCustomer;
     LocalDate fromDate = LocalDate.now().minus(30, ChronoUnit.DAYS);
     LocalDate toDate = LocalDate.now();
@@ -25,17 +26,17 @@ public class ExampleContext {
 
         context.addFunction("energyUsageInKw", c -> mainModelAndData.getEnergyUsageInKws());
         context.addFunction("rents(customerId,from,to)", c -> mainModelAndData.findRentedDaysForCustomer(
-                (Integer) c.<Integer>get("customerId").apply(this),
-                (LocalDate) c.get("from").apply(this),
-                (LocalDate) c.get("to").apply(this)));
+                (Integer) c.getVariableValue("customerId").get(),
+                (LocalDate) c.getVariableValue("from").get(),
+                (LocalDate) c.getVariableValue("to").get()));
         context.addFunction("calculateRents(prices,rents)", c -> mainModelAndData.enrichRentDataWithPrice(
-                (List<MainModelAndData.ConfirmedRentedDay>) c.get("prices").apply(this),
-                (List<MainModelAndData.Price>) c.get("rents").apply(this)
+                (List<MainModelAndData.ConfirmedRentedDay>) c.getFunction("prices").apply(c),
+                (List<MainModelAndData.Price>) c.getFunction("rents").apply(c)
         ));
         context.addFunction("energyKw(rents,energyInKw)", c -> mainModelAndData.allEnergyForRents(
-                (List<MainModelAndData.ConfirmedRentedDay>) c.get("rents").apply(this),
-                (List<MainModelAndData.EnergyInKw>) c.get("energyUsageInKw").apply(this),
-                (Double)c.get("energyPrice").apply(this)
+                (List<MainModelAndData.ConfirmedRentedDay>) c.getFunction("rents").apply(c),
+                (List<MainModelAndData.EnergyInKw>) c.getFunction("energyUsageInKw").apply(c),
+                (Double)c.getVariableValue("energyPrice").get()
         ));
     }
 
