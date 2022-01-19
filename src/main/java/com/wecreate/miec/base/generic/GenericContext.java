@@ -28,7 +28,7 @@ public class GenericContext {
     }
 
     public StringBuilder printAllDefinitions() {
-        StringBuilder ret = new StringBuilder("Variables:\n");
+        StringBuilder ret = new StringBuilder("\nVariables:\n");
         variables.forEach((k,v) -> ret.append(String.format("\t%s\n", k)));
         ret.append(("Functions:\n"));
         functionMap.forEach((k,v) -> {
@@ -37,6 +37,9 @@ public class GenericContext {
             if(params!=null) {
                 ret.append("(");
                 for(int i=0; i<params.size(); i++) {
+                    if(!isVariableSet(params.get(i))) {
+                        ret.append("*");
+                    }
                     ret.append(params.get(i));
                     ret.append(i>= (params.size()-1) ? "":",");
                 }
@@ -63,6 +66,24 @@ public class GenericContext {
             this.functionParamMap.put(pureKey, paramsAsList);
         }
         this.functionMap.put(pureKey, value);
+    }
+
+    public boolean isFunctionSet(String identifier) {
+        if(identifier.startsWith("#")) {
+            identifier = identifier.substring(1);
+        }
+        return getFunction(identifier)!=null;
+    }
+
+    public boolean isFilterSet(String identifier) {
+        if(identifier.startsWith("$")) {
+            identifier = identifier.substring(1);
+        }
+        return getFilter(identifier)!=null;
+    }
+
+    public boolean isVariableSet(String identifier) {
+        return getVariableValue(identifier)!=null;
     }
 
     public <T>Function<GenericContext, T> getFunction(String key) {

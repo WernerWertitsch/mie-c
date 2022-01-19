@@ -6,12 +6,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Slf4j
 public class SequenceCpmtextWraüüer {
     //we will have multiple contexts here
     GenericContext genericContext;
     MessageReceiver messageReceiver;
+
+    //TODO NEXT:
+    //syntax für filter und math functions definnieren (<variable.$xxyz), (y=variable.ssum(fieldName))
+    //
 
     @Autowired
     public SequenceCpmtextWraüüer(MessageReceiver messageReceiver) {
@@ -23,14 +29,7 @@ public class SequenceCpmtextWraüüer {
         populator.populateContext(genericContext);
     }
 
-    //TODO NEXT: bei print schauen ob alle notwendigen fucntion variablen gesetzt sind und anezeigen
-    //hier entweder bei jeddem set die sequence, oder das separat...im letzteren fall muss ein "compute/run" geben, aber wenn dann scahuen ob da eh geht
-    //glaub letztendlich muss alles auf variablen level existrieren, udh im idealfall bei print zurückverfolgen
-
-    //ok also theoretisch ist die math etc function usage schon im domain context, dann hier convenience zeug machen evtl oder doch nicht?
-
-    protected boolean setValue(String variableName, String identifier) {
-        //ok MITTRWOCH das hier muss halt auch mit math functions listen und so gehen, evtl welche die schon im context sind
+    public boolean setValue(String variableName, String identifier) {
         if(GenericContext.isFunctionIdentifier.apply(identifier)) {
             String pureKey =identifier.substring(1);
             genericContext.putVariableValue(variableName, genericContext.getFunction(pureKey).apply(genericContext));
@@ -55,8 +54,18 @@ public class SequenceCpmtextWraüüer {
         return false;
     }
 
+    public void printVVariable(String identifier) {
+        Object value = this.genericContext.getVariableValue(identifier).get();
+        if(value instanceof List) {
+            List list=(List)value;
+            list.forEach(v -> messageReceiver.message(v.toString()));
+        } else {
+            messageReceiver.message(value.toString());
+        }
+    }
+
     public void print() {
-        log.info("============ CONTEXT CONTENT ==========");
+        log.info("\n============ CONTEXT CONTENT ==========\n\n");
         log.info(this.genericContext.printAllDefinitions().toString());
     }
 

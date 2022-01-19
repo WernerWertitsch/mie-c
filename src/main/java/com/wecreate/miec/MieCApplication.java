@@ -20,6 +20,9 @@ public class MieCApplication {
         this.sequenceCpmtextWraüüer = sequenceCpmtextWraüüer;
         this.sequenceCpmtextWraüüer.populate(new DefaultDomainFunctions());
         this.sequenceCpmtextWraüüer.print();;
+        this.sequenceCpmtextWraüüer.setValue("test", "#rents");
+        this.sequenceCpmtextWraüüer.print();;
+        this.sequenceCpmtextWraüüer.printVVariable("test");
     }
 
 
