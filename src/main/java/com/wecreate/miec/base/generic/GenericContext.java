@@ -17,9 +17,11 @@ public class GenericContext {
     Map<String, Function<Object, Boolean>> filterMap = new HashMap<>();
     Map<String, Supplier<Object>> variables = new HashMap<>();
 
-    public static final Function<String, Boolean> isFunctionIdentifier = (s -> s.startsWith("#"));
-    public static final Function<String, Boolean> isFulterIdentifier = (s -> s.startsWith("$"));
-    public static final Function<String, Boolean> isConstant = (s -> s.startsWith("+"));
+    public static final String functionPrefix = "#";
+    public static final String filterPrefix = "$";
+    public static final String constantPrefix= "+";
+    public static final String variablePrefix= "!";
+
 
     MessageReceiver messageReceiver;
 
@@ -52,6 +54,18 @@ public class GenericContext {
         return ret;
     }
 
+    public Object getValue(String identifier) {
+        String prefix = identifier.substring(0,1);
+        String pureKey = identifier.substring(1);
+        switch (prefix) {
+            case functionPrefix: return getFunction(pureKey);
+            case filterPrefix: return getFilter(pureKey);
+            case variablePrefix: return getVariableValue(pureKey);
+            case constantPrefix: return getVariableValue(pureKey);
+        }
+        return null;
+    }
+
     public void addFunction(String fullIdentifier, Function<GenericContext, Object> value) {
         String pureKey = fullIdentifier;
         if(fullIdentifier.contains("(")) {
@@ -66,20 +80,6 @@ public class GenericContext {
             this.functionParamMap.put(pureKey, paramsAsList);
         }
         this.functionMap.put(pureKey, value);
-    }
-
-    public boolean isFunctionSet(String identifier) {
-        if(identifier.startsWith("#")) {
-            identifier = identifier.substring(1);
-        }
-        return getFunction(identifier)!=null;
-    }
-
-    public boolean isFilterSet(String identifier) {
-        if(identifier.startsWith("$")) {
-            identifier = identifier.substring(1);
-        }
-        return getFilter(identifier)!=null;
     }
 
     public boolean isVariableSet(String identifier) {
@@ -105,7 +105,5 @@ public class GenericContext {
     public <T>Supplier<T> getVariableValue(String key) {
         return (Supplier<T>) this.variables.get(key);
     }
-
-
 
 }

@@ -1,55 +1,64 @@
 package com.wecreate.miec.base.generic;
 
+import com.wecreate.miec.base.generic.functions.FilterFunctions;
+import com.wecreate.miec.base.generic.functions.MathFunctions;
 import com.wecreate.miec.base.generic.util.ContextPopulator;
 import com.wecreate.miec.base.generic.util.MessageReceiver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 @Slf4j
 public class SequenceCpmtextWraüüer {
-    //we will have multiple contexts here
+    //we could have multiple contexts here (a map)
     GenericContext genericContext;
     MessageReceiver messageReceiver;
 
+    FilterFunctions filterFunctions;
+    MathFunctions mathFunctions;
     //TODO NEXT:
     //syntax für filter und math functions definnieren (<variable.$xxyz), (y=variable.ssum(fieldName))
     //
 
     @Autowired
-    public SequenceCpmtextWraüüer(MessageReceiver messageReceiver) {
+    public SequenceCpmtextWraüüer(MessageReceiver messageReceiver, FilterFunctions filterFunctions, MathFunctions mathFunctions) {
         this.messageReceiver = messageReceiver;
         this.genericContext = new GenericContext(messageReceiver);
+        this.filterFunctions = filterFunctions;
+        this.mathFunctions = mathFunctions;
     }
 
     public void populate(ContextPopulator populator) {
         populator.populateContext(genericContext);
     }
 
+
+
+
     public boolean setValue(String variableName, String identifier) {
-        if(GenericContext.isFunctionIdentifier.apply(identifier)) {
-            String pureKey =identifier.substring(1);
-            genericContext.putVariableValue(variableName, genericContext.getFunction(pureKey).apply(genericContext));
-            return true;
-        }
-        if(GenericContext.isFulterIdentifier.apply(identifier)) {
-            String pureKey = identifier.substring(1);
-            genericContext.putVariableValue(variableName, genericContext.getFilter(pureKey).apply(genericContext));
-            return true;
-        }
-        if(GenericContext.isConstant.apply(identifier)) {
-            String pureKey = identifier.substring(1);
-            genericContext.putVariableValue(variableName, identifier);
-            return true;
+        String initialSetStatement=identifier;
+        String[] pipeParts=null;
+        if(identifier.contains(".")) {
+            pipeParts = identifier.split(".");
+            initialSetStatement = pipeParts[0];
+            pipeParts = Arrays.copyOfRange(pipeParts,1, pipeParts.length);
         }
 
-        if(genericContext.getVariableValue(identifier)!=null) {
-            genericContext.putVariableValue(variableName, genericContext.getVariableValue(identifier).get());
-            return true;
+        Object value=this.genericContext.getValue(identifier);
+
+        // TODO NEXT, HIER DIE PIPE DURCHGEHEN, MIT IRGENDINEM FORMAT
+
+        Object finalValue;
+        if(value instanceof List) {
+            finalValue = pipeProcessList(value, pipeParts);
+        } else {
+
         }
+
 
         return false;
     }
